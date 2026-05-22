@@ -1,0 +1,27 @@
+Github Workflows - YAML Github Workflow (github-workflow.json)
+
+---
+
+name: Complete devops pipeline
+
+on:
+  push:
+    branches: 
+    - main
+
+    jobs:
+  build_and_push:
+   runs-on: ubuntu-latest
+    steps:
+    -name: Checkout code
+     uses: actions/checkout@v2
+    -name: set Short SHA
+    run:
+    echo "SHORT_SHA=${Github_SHA} | cut -c1-7" >> $GITHUB_ENV
+    -name: Build and push Docker image
+     run: |
+     docker build -t priyamvyas/devops-project:${{ env.SHORT_SHA }} .
+    -name: Login to DockerHub
+     run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+     -name: Push Docker image
+      run: docker push priyamvyas/devops-project:${{ env.SHORT_SHA }}
